@@ -61,31 +61,31 @@ In this model, the dataset used is the `anime-filtered.csv` file.
   
 ### Variable Descriptions
 The anime datasets column has the following information:
-**`anime_id`:** A unique ID for each anime (number or identifier code).
-**`Name`:** The title of the anime in its original language.
-**`Score`:** The score or rating given to the anime.
-**`Genres`:** Genre of the anime, separated by commas (for example, Action, Comedy, Fantasy).
-**`English name`:** The English title of the anime (if available).
-**`Japanese name`:** Anime title in Japanese (if available).
-**`Synopsis`:** A short description or plot summary of the anime.
-**`Type`:** Type of anime (for example, TV Series, Movie, OVA, etc.).
-**`Episodes`:** Number of episodes in the anime.
-**`Aired`:** The date the anime was aired.
-**`Premiered`:** The season and year the anime premiered.
-**`Producers`:** The production company or producer of the anime.
-**`Licensors`:** Parties that have licensed the anime (for example, streaming platforms).
-**`Studios`:** Animation studios that work on anime.
-**`Source`:** The source material of the anime (for example, manga, light novel, original).
-**`Duration`:** The duration of each anime episode.
-**`Rating`:** Age restriction for watching anime.
-**`Ranked`:** Ranking of anime based on popularity or other criteria.
-**`Popularity`:** Anime popularity ranking.
-**`Members`:** Number of members who have added anime to their list on the platform.
-**`Favorites`:** Number of users who marked the anime as favorite.
-**`Watching`:** The number of anime that are currently being watched by users.
-**`Completed`:** The number of anime that the user has finished watching.
-**`On Hold`:** The number of anime that the user has put on hold.
-**`Dropped`:** The number of anime stopped by the user.
+• `anime_id`: A unique ID for each anime (number or identifier code).  
+• `Name`: The title of the anime in its original language.  
+• `Score`: The score or rating given to the anime.  
+• `Genres`: Genre of the anime, separated by commas (for example, Action, Comedy, Fantasy).  
+• `English name`: The English title of the anime (if available).  
+• `Japanese name`: Anime title in Japanese (if available).  
+• `Synopsis`: A short description or plot summary of the anime.  
+• `Type`: Type of anime (for example, TV Series, Movie, OVA, etc.).  
+• `Episodes`: Number of episodes in the anime.  
+• `Aired`: The date the anime was aired.  
+• `Premiered`: The season and year the anime premiered.  
+• `Producers`: The production company or producer of the anime.  
+• `Licensors`: Parties that have licensed the anime (for example, streaming platforms).  
+• `Studios`: Animation studios that work on anime.  
+• `Source`: The source material of the anime (for example, manga, light novel, original).  
+• `Duration`: The duration of each anime episode.  
+• `Rating`: Age restriction for watching anime.  
+• `Ranked`: Ranking of anime based on popularity or other criteria.  
+• `Popularity`: Anime popularity ranking.  
+• `Members`: Number of members who have added anime to their list on the platform.  
+• `Favorites`: Number of users who marked the anime as favorite.  
+• `Watching`: The number of anime that are currently being watched by users.  
+• `Completed`: The number of anime that the user has finished watching.  
+• `On Hold`: The number of anime that the user has put on hold.  
+• `Dropped`: The number of anime stopped by the user.
 
 
 Figures:
