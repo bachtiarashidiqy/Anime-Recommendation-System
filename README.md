@@ -65,7 +65,7 @@ The anime datasets column has the following information:
 **`Name`:** The title of the anime in its original language.
 **`Score`:** The score or rating given to the anime.
 **`Genres`:** Genre of the anime, separated by commas (for example, Action, Comedy, Fantasy).
-***`English name`:** The English title of the anime (if available).
+**`English name`:** The English title of the anime (if available).
 **`Japanese name`:** Anime title in Japanese (if available).
 **`Synopsis`:** A short description or plot summary of the anime.
 **`Type`:** Type of anime (for example, TV Series, Movie, OVA, etc.).
@@ -89,18 +89,25 @@ The anime datasets column has the following information:
 
 
 Figures:
+![Averages Rating](https://github.com/user-attachments/assets/6e5aaa1d-4ddb-4105-ba73-6004fe2ec777)
 
 Figure 1: Distribution of ratings:
 
 The average rating is approximately 6.5, with the minimum at 1.8 and the maximum at 9.1.
 
+![Categories Distribution](https://github.com/user-attachments/assets/cb51bcd7-c30c-4c5e-920b-ed1eea87b075)
+
 Figure 2: Distribution of anime categories:
 
 Anime types include TV, OVA, Movie, Special, ONA, and Music. TV (Television Series) are broadcast on TV with varying episodes; OVA (Original Video Animation) are released for home media; Movies are theatrical releases; Specials are bonus content; ONA (Original Net Animation) are online distributed; Music is created for album or single releases.
 
+![Top10Community](https://github.com/user-attachments/assets/76b13dde-dfd1-476e-8bc7-1fa3a03e362a)
+
 Figure 3: Top 10 Anime Communities:
 
 The most active community is for "Death Note," followed by "Shingeki no Kyojin," "Fullmetal Alchemist: Brotherhood," "Sword Art Online," "One Punch Man," "Boku no Hero Academia," "Tokyo Ghoul," "Naruto," "Steins Gate," and "No Game No Life." These community sizes indicate the popularity of these titles among users, providing insights for recommendation development.
+
+![Top10AnimeRating](https://github.com/user-attachments/assets/266c9b60-c1d7-4f0a-89d8-ec1d7124ed61)
 
 Figure 4: Top 10 Highest Rated Anime:
 
@@ -118,7 +125,7 @@ This project employed only two algorithms: Cosine Similarity and K-Nearest Neigh
 
 ### Cosine Similarity
 
-Cosine similarity is a method to measure how similar two vectors are within a multi-dimensional space[4]. It calculates the cosine of the angle between two vectors, which represent data points or features. The similarity score ranges from -1 to 1, where:
+Cosine similarity is a method to measure how similar two vectors are within a multi-dimensional space[3]. It calculates the cosine of the angle between two vectors, which represent data points or features. The similarity score ranges from -1 to 1, where:
 - 1 indicates the vectors are perfectly aligned (completely similar),
 - 0 indicates the vectors are orthogonal (no relation),
 - -1 indicates the vectors are diametrically opposed (completely dissimilar).
@@ -163,7 +170,7 @@ Based on **Table 1**, the content-based filtering system successfully recommende
 - Differences in vector magnitude are not fully accounted for, which can lead to similar similarity scores even for vectors with vastly different lengths if their directions are aligned.
 
 ### K-Nearest Neighbor
-**K-Nearest Neighbor (KNN)** is one of the simplest algorithms used for data classification. This algorithm is easy to understand because it groups data based on proximity to neighboring data points [5]. In KNN, a certain number of nearest neighbors (determined by the parameter K) are considered to decide the class or label of the data to be classified. When K=1, the algorithm only considers the single closest neighbor or data record with the most similar characteristics.
+**K-Nearest Neighbor (KNN)** is one of the simplest algorithms used for data classification. This algorithm is easy to understand because it groups data based on proximity to neighboring data points [4]. In KNN, a certain number of nearest neighbors (determined by the parameter K) are considered to decide the class or label of the data to be classified. When K=1, the algorithm only considers the single closest neighbor or data record with the most similar characteristics.
 The KNN algorithm is expressed with the following formula:
 
 $$
@@ -223,7 +230,7 @@ where:
 **Interpretation**: Based on _Table 1: Results of Content-Based Filtering Model Testing (with Genre Filter)_, the precision of the top-5 recommendation model is perfect, at 5/5 or 100%. This indicates that the model provides highly accurate recommendations, correctly suggesting anime with similar names and genres to **One Piece**, such as Action, Adventure, Comedy, Drama, Fantasy, Shounen, and Super Power. The top five recommended applications share genres closely aligned with **One Piece**.
 
 ### Calinski-Harabasz Score
-The **Calinski-Harabasz (CH) score** evaluates clustering algorithms by measuring how well the data points are grouped into distinct and compact clusters [6]. It is defined as the ratio between the within-cluster scatter and the between-cluster scatter. A higher CH score signifies better clustering performance, without requiring any prior knowledge of true labels.
+The **Calinski-Harabasz (CH) score** evaluates clustering algorithms by measuring how well the data points are grouped into distinct and compact clusters [5]. It is defined as the ratio between the within-cluster scatter and the between-cluster scatter. A higher CH score signifies better clustering performance, without requiring any prior knowledge of true labels.
 
 The formula for the Calinski-Harabasz score is:
 
@@ -249,7 +256,7 @@ which yielded a score of:
 **Interpretation**: The relatively low CH score suggests that the clusters in this model are not well separated, indicating potential issues with recommendation accuracy for some applications. This highlights the need for further review or adjustment of the model to improve cluster separation and recommendation quality.
 
 ### Davies-Bouldin Score
-The **Davies-Bouldin (DB) Score** assesses clustering performance by measuring the average similarity between each cluster and its most similar one, comparing intra-cluster distances to inter-cluster distances [6]. With a minimum score of zero, a lower DB score indicates better clustering, reflecting clusters that are close together and less dispersed. Unlike some other metrics, DB does not require prior knowledge of true labels, similar to the Silhouette Score, but with a simpler formulation for efficient evaluation without additional data insights.
+The **Davies-Bouldin (DB) Score** assesses clustering performance by measuring the average similarity between each cluster and its most similar one, comparing intra-cluster distances to inter-cluster distances [5]. With a minimum score of zero, a lower DB score indicates better clustering, reflecting clusters that are close together and less dispersed. Unlike some other metrics, DB does not require prior knowledge of true labels, similar to the Silhouette Score, but with a simpler formulation for efficient evaluation without additional data insights.
 
 The formula for the Davies-Bouldin score is:
 
