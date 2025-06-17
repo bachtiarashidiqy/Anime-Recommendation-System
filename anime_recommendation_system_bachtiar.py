@@ -256,8 +256,6 @@ df.describe().T
 - `25%` is the first quartile. Quartiles are values that mark the boundaries of intervals in four equal parts of the distribution.
 - `50%` is the second quartile, also called the median. - 75%` is the third quartile.
 - `Max` is the maximum value.
-
-## Modelling
 """
 
 df
@@ -286,21 +284,40 @@ data = df.drop(columns=['anime_id',
 
 """Remove columns that are not needed in this model."""
 
-data
+print("Number of duplicate anime names:", data['Name'].duplicated().sum())
 
-"""### Model Content Based Filtering (dengan Filter Genres)"""
+# Create a ‘UniqueName’ field that will be the unique index
+data['UniqueName'] = data['Name']
+
+# Mark duplicate rows of names
+dups = data['Name'].duplicated(keep=False)
+
+# For duplicates, add a number suffix to make it unique
+data.loc[dups, 'Name'] = data.loc[dups].groupby('Name').cumcount().astype(str) + '_' + data.loc[dups, 'Name']
+
+data.head()
+
+data.info()
+
+"""### TF-IDF (Term Frequency-Inverse Document Frequency)"""
 
 tfid = TfidfVectorizer()
 tfid.fit(data['Genres'])
 
 tfid.get_feature_names_out()
 
+"""The `fit_transform()` function computes the TF-IDF weights for each genre term within each document (movie)."""
+
 tfidf_matrix = tfid.fit_transform(data['Genres'])
 
 
 tfidf_matrix.shape
 
+"""This means there are 13,229 movies and 45 unique genre features."""
+
 tfidf_matrix.todense()
+
+"""A sample snippet shows the TF-IDF weights for specific genres in each movie."""
 
 pd.DataFrame(
     tfidf_matrix.todense(),
@@ -308,18 +325,24 @@ pd.DataFrame(
     index=data.Genres
 ).sample(22, axis=1).sample(10, axis=0)
 
-"""The above `tf-idf matrix` output shows the relationship between the anime name against the selected category. This matrix shows how much correlation between Anime and the selected category."""
+"""The above `tf-idf matrix` output shows the relationship between the anime name against the selected category. This matrix shows how much correlation between Anime and the selected category.
 
+## Modelling
+
+### Model Content Based Filtering
+"""
+
+# Calculate cosine similarity matrix
 cosine_sim = cosine_similarity(tfidf_matrix)
+
 cosine_sim
 
-cosine_sim_df = pd.DataFrame(cosine_sim, index=data['Name'], columns=data['Name'])
-print('Shape:', cosine_sim_df.shape)
+# Create a cosine similarity dataframe with index and UniqueName column
+cosine_sim_df = pd.DataFrame(cosine_sim, index=data['UniqueName'], columns=data['UniqueName'])
 
-# View the similarity matrix for each restaurant
-cosine_sim_df.sample(5, axis=1).sample(5, axis=0)
+print('Shape cosine_sim_df:', cosine_sim_df.shape)
 
-def anime_recommendations(anime_name, similarity_data=cosine_sim_df, items=data[['Name','Genres']], k=5):
+def anime_recommendations(anime_name, similarity_data=cosine_sim_df, items=data[['UniqueName','Genres']], k=5):
 
 
     index = similarity_data.loc[:,anime_name].to_numpy().argpartition(
@@ -340,17 +363,15 @@ anime_recommendations('One Piece')
 ### Model K-Nearest Neighbor
 """
 
-animedf_name = pd.DataFrame({'Name':data['Name']})
+animedf_name = pd.DataFrame({'Name':data['UniqueName']})
 animedf_name.head()
 
-data.set_index('Name',inplace=True)
+data_indexed = data.set_index('UniqueName')
+data_n = data_indexed[['Score','Type','Studios']]
+data_dummies = pd.get_dummies(data_n[['Type','Studios']])
+data_new = pd.concat([data_n, data_dummies], axis=1)
+data_new = data_new.drop(columns=['Type', 'Studios'])
 
-data_n = data[['Score','Type','Studios']]
-
-data_new = pd.get_dummies(data_n[['Type','Studios']])
-data_new = pd.concat([data_n, data_new], axis=1)
-data_new = data_new.drop(columns='Type')
-data_new = data_new.drop(columns='Studios')
 data_new.head()
 
 model = NearestNeighbors(metric='euclidean')
@@ -370,6 +391,57 @@ def Recommended_model(anime_name:str, recommend_anime:int=5):
 Recommended_model(animedf_name.loc[21])
 
 """## Evaluation
+
+### Precision Score
+
+---
+
+**The Precision** is an evaluation metric used in classification tasks, particularly in scenarios where the focus is on the accuracy of positive predictions. It measures the proportion of true positive predictions out of all instances that the model predicted as positive. Precision is especially important in cases where false positives are costly or undesirable, such as medical diagnosis or spam detection.
+
+**The Precision** formula is:
+
+
+$${Precision} = \frac{TP}{TP + FP}$$
+
+
+Where:
+- \( TP \) (True Positives) adalah jumlah data yang benar-benar positif dan diprediksi positif oleh model.
+- \( FP \) (False Positives) adalah jumlah data yang sebenarnya negatif tetapi diprediksi positif oleh model.
+
+Precision values range between 0 and 1. The higher the Precision value, the better the model is at accurately predicting positives without generating many false positives.
+
+---
+"""
+
+def is_relevant(genres1, genres2):
+    set1 = set(genres1.split(', '))
+    set2 = set(genres2.split(', '))
+    return len(set1.intersection(set2)) > 0
+
+k = 5
+precision_scores = []
+
+for anime_id in data['UniqueName']:
+    sim_scores = cosine_sim_df.loc[anime_id].drop(anime_id)
+    top_k_anime = sim_scores.sort_values(ascending=False).head(k).index
+
+    target_genre = data.loc[data['UniqueName'] == anime_id, 'Genres'].values[0]
+
+    relevant_count = 0
+    for rec_id in top_k_anime:
+        rec_genre = data.loc[data['UniqueName'] == rec_id, 'Genres'].values[0]
+        if is_relevant(target_genre, rec_genre):
+            relevant_count += 1
+
+    precision = relevant_count / k
+    precision_scores.append(precision)
+
+mean_precision = np.mean(precision_scores)
+print(f'Average Precision@{k}: {mean_precision:.4f}')
+
+"""The Precision@5 value of 1.0 indicates that all the top 5 recommendations for each anime are truly relevant based on the genre overlap criteria.
+
+This indicates that the genre-based cosine similarity model successfully recommends anime that are very similar in genre, so the model is very effective in the context of the data and relevance definition used.
 
 ### Calinski-Harabasz score
 
