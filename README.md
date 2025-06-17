@@ -113,13 +113,58 @@ Figure 4: Top 10 Highest Rated Anime:
 
 The highest-rated anime is "Fullmetal Alchemist: Brotherhood," followed by "Shingeki no Kyojin: Final Season," "Steins Gate," "Shingeki no Kyojin Season 3 Part 2," "Hunter x Hunter (2011)," "Gintama°," "Gintama'," "Ginga Eiyuu Densetsu," "Gintama: Enchousen," and "3-gatsu no Lion 2nd Season." Ratings reflect user contributions, with higher ratings indicating greater popularity among viewers.
 
-**Data Preparation**
-
+## Data Preparation
 During the Data Preparation phase, text cleaning was performed to remove punctuation marks and URLs from the dataset. For handling missing values, the approach used was *dropping* the affected records via the `drop()` method. The reason for choosing this method is that the omitted data does not significantly impact the model’s performance. Initially, the dataset contained 14,952 records; after removing entries with missing values, the dataset size was reduced to 13,229 records. 
 
-For building the recommendation system in this project, the features utilized were `Name`, `Score`, `Genres`, `Type`, and `Studios`. The genre-based recommendation system primarily relies on the `Name` and `Genres` attributes, while the collaborative filtering approach uses `Name`, `Score`, and `Type`. Additionally, one-hot encoding was applied to transform the categorical features `Type` and `Score` into a format that is more easily processed by machine learning models.
+Creating the `UniqueName` feature this step is done to ensure each anime has a unique name as an identifier, because in the original data there are many duplicate anime names.
 
-### Modeling
+For building the recommendation system in this project, the features utilized were `UniqueName`, `Score`, `Genres`, `Type`, and `Studios`. The genre-based recommendation system primarily relies on the `UniqueName` and `Genres` attributes, while the collaborative filtering approach uses `UniqueName`, `Score`, and `Type`. Additionally, one-hot encoding was applied to transform the categorical features `Type` and `Studios` into a format that is more easily processed by machine learning models.
+
+
+### TF-IDF Vectorizer
+This section involves extracting textual features from movie genre data using the TF-IDF (Term Frequency-Inverse Document Frequency) method. The goal of this process is to evaluate the importance of each genre within each movie and prepare the data for further analysis such as classification or clustering.
+
+**Initialization of the TF-IDF Vectorizer**
+First, a `TfidfVectorizer` object from scikit-learn was created:
+```python
+tfid = TfidfVectorizer()
+```
+
+**Fitting and Transforming Data**
+Next, the fitting and transformation were performed on the 'Genres' column of the dataset:
+```python
+tfidf_matrix = tfid.fit_transform(data['Genres'])
+```
+- The `fit_transform()` function computes the TF-IDF weights for each genre term within each document (movie).
+
+**Extracting Generated Features**
+The resulting features are the unique genre terms:
+```python
+tfid.get_feature_names_out()
+```
+**Features output:**
+```plaintext
+['action', 'adventure', 'ai', 'arts', 'cars', 'comedy', 'dementia', 'demons', 'drama', 'ecchi', 'fantasy', 'fi', 'game', 'harem', 'historical', 'horror', 'josei', 'kids', 'life', 'magic', 'martial', 'mecha', 'military', 'music', 'mystery', 'of', 'parody', 'police', 'power', 'psychological', 'romance', 'samurai', 'school', 'sci', 'seinen', 'shoujo', 'shounen', 'slice', 'space', 'sports', 'super', 'supernatural', 'thriller', 'unknown', 'vampire']
+```
+
+**Data Dimensions**
+The shape of the TF-IDF matrix indicates:
+```python
+tfidf_matrix.shape
+# (13229, 45)
+```
+This means there are 13,229 movies and 45 unique genre features.
+
+**TF-IDF Matrix Representation**
+The dense representation of the TF-IDF matrix looks like this:
+```python
+tfidf_matrix.todense()
+```
+A sample snippet shows the TF-IDF weights for specific genres in each movie.
+
+The TF-IDF process has been successfully applied to the genre data, resulting in a feature matrix ready for advanced analysis such as clustering, classification, or recommendation systems. The TF-IDF weights effectively represent the significance of each genre within individual movies based on their frequency and distribution across the dataset.
+
+## Modelling
 
 This project employed only two algorithms: Cosine Similarity and K-Nearest Neighbors. Both algorithms are used to analyze the similarity between data points based on their features.
 
@@ -210,24 +255,59 @@ Based on **Table 2**, the K-Nearest Neighbor model provides anime recommendation
 - Requires storing all training data, leading to high memory usage.
 - Sensitive to irrelevant features that may affect classification accuracy.
 
-**Evaluation**
+## Evaluation
 
 Evaluation metrics are used to assess how well a model performs. In this context, several common evaluation metrics are employed to measure the model's effectiveness, including Precision, Calinski-Harabasz Score, and Davies-Bouldin Score. These metrics aim to provide insights into how effectively the model performs specific tasks such as classification or clustering.
 
-### Precision
-**Precision** is a key metric for evaluating clustering performance. It helps measure how accurately the model identifies positive data points. A high precision indicates that the model rarely makes false positive predictions, making its positive predictions more reliable.
+### Precision Score
+**The Precision** is an evaluation metric used in classification tasks, particularly in scenarios where the focus is on the accuracy of positive predictions. It measures the proportion of true positive predictions out of all instances that the model predicted as positive. Precision is especially important in cases where false positives are costly or undesirable, such as medical diagnosis or spam detection.
 
-Precision is calculated with the following formula:
+**The Precision** formula is:
 
-$$
-Precision = \frac{TP}{TP + FP}
-$$
 
-where:
-- **TP** (True Positive): The number of data points correctly predicted as positive.
-- **FP** (False Positive): The number of data points incorrectly predicted as positive.
+$${Precision} = \frac{TP}{TP + FP}$$
 
-**Interpretation**: Based on _Table 1: Results of Content-Based Filtering Model Testing (with Genre Filter)_, the precision of the top-5 recommendation model is perfect, at 5/5 or 100%. This indicates that the model provides highly accurate recommendations, correctly suggesting anime with similar names and genres to **One Piece**, such as Action, Adventure, Comedy, Drama, Fantasy, Shounen, and Super Power. The top five recommended applications share genres closely aligned with **One Piece**.
+
+Where:
+- \( TP \) (True Positives) adalah jumlah data yang benar-benar positif dan diprediksi positif oleh model.
+- \( FP \) (False Positives) adalah jumlah data yang sebenarnya negatif tetapi diprediksi positif oleh model.
+
+Precision values range between 0 and 1. The higher the Precision value, the better the model is at accurately predicting positives without generating many false positives.
+
+Model evaluation is performed using the following code:
+```
+def is_relevant(genres1, genres2):
+    set1 = set(genres1.split(', '))
+    set2 = set(genres2.split(', '))
+    return len(set1.intersection(set2)) > 0
+
+k = 5
+precision_scores = []
+
+for anime_id in data['UniqueName']:
+    sim_scores = cosine_sim_df.loc[anime_id].drop(anime_id)
+    top_k_anime = sim_scores.sort_values(ascending=False).head(k).index
+    
+    target_genre = data.loc[data['UniqueName'] == anime_id, 'Genres'].values[0]
+    
+    relevant_count = 0
+    for rec_id in top_k_anime:
+        rec_genre = data.loc[data['UniqueName'] == rec_id, 'Genres'].values[0]
+        if is_relevant(target_genre, rec_genre):
+            relevant_count += 1
+            
+    precision = relevant_count / k
+    precision_scores.append(precision)
+
+mean_precision = np.mean(precision_scores)
+print(f'Average Precision@{k}: {mean_precision:.4f}')
+```
+which produced a score of:
+```
+1.0000
+```
+
+**Interpretation**: The Precision@5 value of 1.0 indicates that all the top 5 recommendations for each anime are truly relevant based on the genre overlap criteria. This indicates that the genre-based cosine similarity model successfully recommends anime that are very similar in genre, so the model is very effective in the context of the data and relevance definition used.
 
 ### Calinski-Harabasz Score
 The **Calinski-Harabasz (CH) score** evaluates clustering algorithms by measuring how well the data points are grouped into distinct and compact clusters [5]. It is defined as the ratio between the within-cluster scatter and the between-cluster scatter. A higher CH score signifies better clustering performance, without requiring any prior knowledge of true labels.
@@ -244,7 +324,7 @@ where:
 - \( N \) is the total number of data points.
 - \( k \) is the number of clusters.
 
-The model testing was performed using the following code:
+Model evaluation is performed using the following code:
 ```python
 calinski_harabasz_score(data_new, animedf_name)
 ```
